@@ -8,17 +8,17 @@ public class Main {
         Stack<Integer> buffer = new Stack<>();
         Stopper stopper = new Stopper();
         Random random = new Random();
-	    Publisher publisher = new Publisher(buffer, 3, stopper, random);
-	    Subscriber subscriber = new Subscriber(buffer, stopper, random);
+	    Thread publisherThread = new Thread(new Publisher(buffer, 3, stopper, random));
+	    Thread subscriberThread = new Thread(new Subscriber(buffer, stopper, random));
 
 	    System.out.println("Start");
-	    publisher.start();
-	    subscriber.start();
+	    publisherThread.start();
+	    subscriberThread.start();
 
 	    Thread.sleep(10 * 1000);
 	    stopper.stop();
-	    publisher.join();
-	    subscriber.join();
+	    publisherThread.join();
+	    subscriberThread.join();
 	    System.out.println("Stop");
     }
 }
@@ -36,7 +36,7 @@ class Stopper {
 
 // Producent. Tworzy liczby losowe i dodaje je do bufora. Informuje o tej akcji w konsoli.
 // Nie dodaje do bufora jeżeli osiągnął maksymalną wielkość.
-class Publisher extends Thread {
+class Publisher implements Runnable {
     private final Stack<Integer> _buffer;
     private final int _size;
     private final Random _random;
@@ -66,7 +66,7 @@ class Publisher extends Thread {
 
 // Konsument. Pobiera liczbę z bufora i wyświetla w konsoli.
 // Czeka, jeżeli bufor jest pusty.
-class Subscriber extends Thread {
+class Subscriber implements Runnable {
     private final Stack<Integer> _buffer;
     private final Stopper _stopper;
     private final Random _random;
